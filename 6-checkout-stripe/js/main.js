@@ -37,10 +37,10 @@ Promise.all([
 ])
   .then((response) => Promise.all(response.map((res) => res.json())))
   .then((json) => {
-    console.log(json);
+    //console.log(json);
     let products = json[0].data,
       prices = json[1].data;
-    console.log(products, prices);
+    //console.log(products, prices);
 
     prices.forEach((el) => {
       let productData = products.filter((product) => product.id === el.product);

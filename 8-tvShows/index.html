@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tv Shows con API TVmaze</title>
+  <style>
+    main {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .loader {
+      display: block;
+      margin: auto;
+    }
+
+    .show {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      margin: 10px;
+      background-color: #ddd;
+    }
+
+    .show h2 {
+      text-align: center;
+      padding: 10px;
+      height: 50px;
+    }
+
+    .show img {
+      width: 90%;
+    }
+
+    .show div {
+      padding: 0 15px;
+      text-align: justify;
+      line-height: 1.2;
+      height: 200px;
+      overflow: hidden;
+    }
+
+    .show a {
+      margin: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Tv Shows con API TVmaze</h1>
+  <input type="search" name="TVShows" id="search" placeholder="Buscar Shows de TV...">
+  <main>
+  </main>
+
+  <template id="search-template">
+    <div class="show">
+      <h2></h2>
+      <img>
+      <div></div>
+      <a></a>
+    </div>
+  </template>
+  <script>
+    const d = document,
+      $search = d.getElementById('search'), $template = d.getElementById('search-template').content,
+      $main = d.querySelector("main"),
+      $fragment = new DocumentFragment();
+
+    d.addEventListener("keypress", async e => {
+      if (e.target.matches("#search")) {
+        //console.log(e.charCode === 13)
+        if (e.charCode === 13) {
+          $main.innerHTML = `<img src= "../assets/loader/svg-loaders/tail-spin.svg" alt="loader" class="loader">`
+          try {
+            let query = $search.value.toLowerCase();
+            //console.log(query)
+            api = `http://api.tvmaze.com/search/shows?q=${query}`,
+              res = await fetch(api),
+              json = await res.json();
+
+            /* FALTA ARROJAR ERROR EN CASO DE NO ENCONTRAR RESULTADOS */
+            if (!res.ok) throw { status: status, statusText: statusText }
+
+            //console.log(json[0].show)
+            json.forEach(el => {
+
+              console.log(el.show.summary);
+
+              $template.querySelector(".show h2").textContent = el.show.name ? el.show.name : `Nombre del titulo no encontrado`;
+
+              $template.querySelector(".show div").innerHTML = el.show.summary ? el.show.summary : `Resumen no disponible`;
+
+              $template.querySelector("img").src = el.show.image ? el.show.image.medium : "https://static.tvmaze.com/images/no-img/no-img-portrait-text.png";
+              $template.querySelector("img").alt = el.show.name;
+
+              $template.querySelector("a").href = el.show.url ? el.show.url : "#";
+              $template.querySelector("a").target = el.show.url ? "_blank" : "_self";
+              $template.querySelector("a").textContent = el.show.url ? "Ver más..." : "";
+
+              let $clone = d.importNode($template, true);
+              $fragment.appendChild($clone)
+            });
+
+            $main.innerHTML = ""
+            $main.appendChild($fragment);
+          } catch (err) {
+            console.log(err);
+            let message = err.statusText || "Ocurrio un error";
+            $main.innerHTML = `<p>Error ${err.status} : ${message}</p>`;
+          }
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

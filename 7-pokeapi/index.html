@@ -16,7 +16,7 @@
 
     .grid-fluid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       text-align: center;
     }
 
@@ -58,7 +58,7 @@
         //validacion en caso de error enviamos lo siguiente.
         if (!res.ok) throw { status: res.status, statusText: res.statusText }
 
-        console.log(pokemones);
+        //console.log(pokemones);
         //console.log(pokemones.results);
 
         for (let i = 0; i < pokemones.results.length; i++) {
