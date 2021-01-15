@@ -81,13 +81,13 @@
               res = await fetch(api),
               json = await res.json();
 
-            /* FALTA ARROJAR ERROR EN CASO DE NO ENCONTRAR RESULTADOS */
+
             if (!res.ok) throw { status: status, statusText: statusText }
 
             //console.log(json[0].show)
             json.forEach(el => {
 
-              console.log(el.show.summary);
+              //console.log(el.show.summary);
 
               $template.querySelector(".show h2").textContent = el.show.name ? el.show.name : `Nombre del titulo no encontrado`;
 
@@ -107,7 +107,7 @@
             $main.innerHTML = ""
             $main.appendChild($fragment);
           } catch (err) {
-            console.log(err);
+            //console.log(err);
             let message = err.statusText || "Ocurrio un error";
             $main.innerHTML = `<p>Error ${err.status} : ${message}</p>`;
           }

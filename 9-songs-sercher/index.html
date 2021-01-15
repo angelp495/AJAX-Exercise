@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscador de canciones</title>
+
+  <style>
+    html {
+      font-family: sans-serif;
+      font-size: 16px;
+    }
+
+    body {
+      padding: 0 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    main {
+      display: flex;
+      align-items: center;
+      flex-direction: column-reverse;
+    }
+
+
+    @media screen and (min-width: 800px) {
+      main {
+        flex-direction: row;
+        width: 90%;
+      }
+
+      main>* {
+        padding: 1rem;
+        max-width: 40vw;
+      }
+    }
+
+    main div {
+      margin: 10px auto;
+      width: 45%;
+    }
+
+    div p {
+      max-width: 100%;
+    }
+
+    .poster {
+      max-height: 40vh;
+    }
+
+    .none {
+      display: none;
+    }
+
+    #songContainer blockquote {
+      white-space: pre-wrap;
+    }
+
+    #loader {
+      width: 100%;
+      height: 80px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Buscador de canciones</h1>
+  <form id="search">
+    <input type="text" id="singer" placeholder="Cantante..." required>
+    <br>
+    <input type="text" id="song" placeholder="Canción ..." required>
+    <br>
+    <input type="submit" value="Buscar">
+  </form>
+  <img class="none" src="../assets/loader/svg-loaders/audio.svg" alt="Buscando..." id="loader">
+  <main>
+    <div id="singerContainer">
+      <!-- 
+        Nombre h2
+        Imagen
+        parrafo Fecha de nacimiento - vive?
+        Biografia Es? es : en 
+      -->
+    </div>
+    <div id="songContainer">
+      <!-- Letra de la canción -->
+    </div>
+  </main>
+</body>
+<script>
+  const d = document,
+    $loader = d.getElementById("loader"),
+    $search = d.getElementById("search"),
+    $singer = d.getElementById("singer"),
+    $song = d.getElementById("song"),
+    $singerContainer = d.getElementById("singerContainer");
+  $songContainer = d.getElementById("songContainer");
+
+  $search.addEventListener("submit", async e => {
+    e.preventDefault()
+
+    $loader.classList.remove("none")
+
+    try {
+      let singer = $singer.value.toLowerCase(),
+        song = $song.value.toLowerCase(),
+        singerAPI = `https://www.theaudiodb.com/api/v1/json/1/search.php?s=${singer}`,
+        songAPI = `https://api.lyrics.ovh/v1/${singer}/${song}`,
+        singerFetch = fetch(singerAPI),
+        songFetch = fetch(songAPI),
+        [singerResponse, songResponse] = await Promise.all([singerFetch, songFetch]),
+        singerData = await singerResponse.json(),
+        songData = await songResponse.json(),
+        $singerTemplate,
+        $songTemplate;
+
+      //console.log(singerData)
+      if (singerData.artists === null) {
+        $singerTemplate = `<h2>No se encontraron resultados para <mark>${singer}</mark> </h2>`
+      } else {
+        let singer = singerData.artists[0];
+
+        $singerTemplate = `
+        <h2>${singer.strArtist.toUpperCase()}</h2>
+        <img src="${singer.strArtistThumb}" alt="${singer.strArtist}" class="poster">
+        <p>${singer.strCountry} | ${(singer.intBornYear || singer.intFormedYear)} - ${(singer.intDiedYear || "Presente")} | <a href="${singer.strTwitter}">Twitter</a>
+        </p>
+        <p>${(singer.strBiographyES || singer.strBiographyEN)}</p>
+        `
+      }
+
+
+      console.log(songData)
+      if (songData.lyrics == "" || songData.err) {
+        $songTemplate = `<h2>No se encontraron resultados para <mark>${song}</mark></h2>`;
+      } else {
+        $songTemplate = `
+        <h2>${song.toUpperCase()}</h2>
+        <blockquote>${songData.lyrics}</blockquote>
+        `
+      }
+
+
+      $loader.classList.add("none");
+      $singerContainer.innerHTML = $singerTemplate;
+      $songContainer.innerHTML = $songTemplate;
+
+    } catch (err) {
+      let message = err.statusText || `Ocurrió un error`;
+      $song.innerHTML = message
+    }
+
+  });
+</script>
+
+</html>
