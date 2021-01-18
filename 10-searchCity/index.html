@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscar Ciudad</title>
+</head>
+
+<body>
+  <h1>Buscador de ciudades en México</h1>
+  <h2>Selecciona un estado</h2>
+  <select name="state" id="state">
+    <option value="chooseState">-- Selecciona una ciudad -- </option>
+  </select>
+  <select name="city" id="city"></select>
+</body>
+<script>
+  const d = document, $state = d.getElementById("state"), $city = d.getElementById("city")
+
+  d.addEventListener("DOMContentLoaded", async e => {
+
+    try {
+      let stateAPI = `https://api-sepomex.hckdrk.mx/query/get_estados`,
+        res = await fetch(stateAPI),
+        json = await res.json();
+
+      //console.log(json)
+
+      if (!json.error) {
+        let $stateTemplate;
+
+        json.response.estado.forEach(estado => {
+
+          $stateTemplate += `
+          <option value="${estado}">${estado}</option>
+          `
+        });
+
+        $state.innerHTML += $stateTemplate;
+      } else {
+        $state.innerHTML = `<h2>Error al cargar datos</h2>`
+      }
+    } catch (error) {
+      let message = error.statusText || `Ah ocurrido un error`;
+      //console.log(message);
+    }
+  })
+
+  $state.addEventListener("change", async e => {
+    try {
+      //console.log(e.target.value)
+      let state = e.target.value,
+        cityAPI = `https://api-sepomex.hckdrk.mx/query/get_municipio_por_estado/${state}`,
+        res = await fetch(cityAPI),
+        json = await res.json();
+
+      if (!json.error) {
+        //console.log(json.response)
+        let $cityTemplate;
+
+        json.response.municipios.forEach(city => {
+          $cityTemplate += `
+          <option value="${city}">${city}</option>
+          `
+        });
+
+        $city.innerHTML = $cityTemplate;
+      }
+    } catch (error) {
+      let message = error.statusText || `Ah ocurrido un error.`;
+      console.log(message)
+    }
+  });
+</script>
+
+</html>
